@@ -1,0 +1,22 @@
+%%% Copyright 2009 Andrew Thompson <andrew@hijacked.us>. All rights reserved.
+%%%
+%% @doc Some functions for working with binary strings.
+
+-module(start_mail).
+
+-export([start/0
+]).
+
+start()->
+    ok=application:start(crypto),
+    ok=application:start(asn1),
+    
+    ok=application:start(public_key),
+    
+    ok=application:start(ssl),
+    ok=application:start(ranch),
+    
+    ok=application:start(gen_smtp),
+   {ok,_}= gen_smtp_client:send({"joakim.leche@gmail.com", ["joakim.leche@ericsson.com"],
+ "Subject: testing\r\nFrom: Stugvakten  <service.varmdo@gmail.com>\r\nTo: Some Dude <joakim.leche@ericsson.com>\r\n\r\nThis is the email body"},
+  [{relay, "smtp.gmail.com"}, {username, "joakim.leche@gmail.com"}, {password, "Qwerty01"}]).

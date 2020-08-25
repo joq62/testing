@@ -1,0 +1,14 @@
+>  {ok,ConRef1}=ssh:connect("varmdo.asuscomm.com",50222,[{user,"pi"},{password,"festum01"}]).
+{ok,<0.104.0>}
+8> {ok,ChanId}=ssh_connection:session_channel(ConRef1,infinity).                {ok,0}        
+9> ssh_connection:exec(ConRef1,ChanId,"ls",infinity).
+success
+10> flush().
+Shell got {ssh_cm,<0.104.0>,
+                  {data,0,0,
+                        <<"boot_service\ncomputer.config\nDesktop\nerl_crash.dump\ngit_path\nlib_service\nMakefile\nMakefile~\nnode_rpi_2\nnode_setup\npod_50200\nstart.sh\nstart.sh~\ntest\n">>}}
+Shell got {ssh_cm,<0.104.0>,{eof,0}}
+Shell got {ssh_cm,<0.104.0>,{exit_status,0,0}}
+Shell got {ssh_cm,<0.104.0>,{closed,0}}
+ok
+11> 

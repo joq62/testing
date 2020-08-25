@@ -1,0 +1,144 @@
+Infrastructure use cases:
+1) Initial load and start master:
+	init.d/rc-local file bash command 
+	make Makefile
+	Makefile scripts ,
+		a) scratching the node except mnesia? 
+		b) load and compile, master_service, dbase_service
+		c) start master_service
+	
+2) Intitial System start:
+	A) Detect and connect to all computers
+	b) Scratch and start all nodes/vms on connected computers
+	c) On each node: Start node controller and dbase
+	d) 
+3) Restart of controller node:
+	a) 
+
+
+	a) System_boot compute:
+		1)master_service: detect and connect to all all nodes
+	b) 
+
+Architecture principles:
+System_boot compute:
+	a) Intial system start
+	b) Controller active @ start
+
+
+Master data:
+Makefile: [github address to config data, nodeId] 
+config data: 
+	1) nodes.config: [{ip address,port}|{nodeId,erlang node}] 
+	2) deployment.config:[{nodeId,Serviceid}]
+
+
+Master nodes starts as active but befor take any actions the node will check if there is another node that is already active by  
+Download nodes.config and get all master nodes addresses
+Check with the others if theres is one is active 
+ Another active -> step down to standby 
+ No one active  -> step up to active 
+
+Protocol: 
+leaders election alogorithm
+The controller with lowest unique id, use erlang:system_time() to create a unique number. 
+Each controller assigneds a number during init.
+1) Single controller node -> leader
+2) n controller nodes -> lowest system_time (oldest) -> leader
+
+The leaders resets timers on no-leaders nodes.The no-leaders nodes timer value is set to leaders timer + a delay.
+If he delay timer is triggered the node with lowest id claims it self to become a leader.
+The delay should a random number rand:uniform(10)*2*1000 =>  2000=< Delay =< 20000 with 2 sec interval 
+
+Algorithm:
+start controller
+	Age=erlang:system_time(),
+	TimerValue = election_interval + rand:uniform(10)*2*1000 
+	Start timer_process
+	set to standby
+
+	signal posponed_election ->
+		kill current timer_process
+		restart a new timer process
+		keep standby state
+	timeout timer_process
+	broad_cast:elect_me(Age)->
+		
+		
+
+
+
+
+Standby nodes recurrently ask for permission to become active
+AnyOneInCharge -> [no,no] -> InCharge
+AnyOneInCharge -> [timeout|Node down] -> InCharge
+AnyOneInCharge -> [yes,no] -> Stepdown
+
+If there is an session ongoing it's not aloud to start a new session.
+Error conditions
+1) Two or more nodes starts a session at the same time and sends out request at the same time and has not got the response
+	Abort and back off slumpmässig tid 
+2) If a correct request comes in the poll timer resets.
+
+
+  1
+	
+Active node frequently sets other masters in Standby mode
+If active fails -> standby node time out and request control   
+
+Node 1 sends request 
+Node 1 (stby)		Node 2(Active)		Node (stby)
+ Want2bActive 	->
+ Wat2bActive 				->
+		<- NoWay
+		<- ok
+Retreives master nodes addresses from nodes.config
+
+Redundancy on computer and applications level.y sending a
+Master nodes 
+Active-Standby: Need to decide who is active or standby. Protocol prohibits both active or both standby 
+Active - Active: Risk for double work , need to be aware of each other.
+At start :genesis no dbase_dir=> intial start and no other master nodes has been started.
+	1) scratch computer
+	2) download and compile master_service and dbase_service, 
+	3) start master_service
+	3) dowload config files
+	4) Get modes to connect and/or start from config file
+	3.1) 
+	2) dbase_dir exists: start dbase_service - wait for sync
+	3)
+
+
+Github is the repository for all source code.
+Source code is downloaded to the worker or master and compiled on target.
+The computer is scratched after start or restart
+
+Master nodes polls workers and by that detects newly started/restarted or running nodes if the master is started/restarted.
+
+A worker node has no logic except an ssh port for master to communicate via.
+Initial functionality worker_service and dbase_service  
+The Master node scratches the started/restarted node and also downloads worker_service and dbase_service
+
+master nodes are 
+
+Master node controls
+
+worker:
+Initial only erlang installed.
+Master starts one erlang node used by master to control the worker.
+Two infrastructure services are loaded at start, worker_service and dbase_service
+worker_service: 
+After intitial or re-start the worker is scratched scratched 
+
+1) Load and start service 
+2) Stop and unload service 
+3) Ping 
+
+dbase_service: 
+1) Distributed mnesia database that stores 
+a) service_discovery
+b) log 
+
+
+master:
+Manage initial starts of existing nodes 
