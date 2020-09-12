@@ -33,33 +33,33 @@ test()->
     io:format("~p~n",[net_adm:ping(?VM0)]),
     io:format("~p~n",[net_adm:ping(?VM1)]),
     rpc:call(?VM0,init,stop,[]),
-    timer:sleep(200),
+    timer:sleep(500),
     rpc:call(?VM1,init,stop,[]),
-    timer:sleep(200),
+    timer:sleep(500),
     send("rm -rf 30000 30001"),
     send("mkdir 30000"),
     send("mkdir 30001"),
     send("rm -rf include configs *_service  erl_crasch.dump"),
     send("git clone https://github.com/joq62/include.git"),
     io:format("~p~n",[{?MODULE,?LINE,send("git clone https://github.com/joq62/adder_service.git 30000")}]),
-  %  io:format("~p~n",[{?MODULE,?LINE,send("pwd")}]),
-    timer:sleep(200),
+    io:format("~p~n",[{?MODULE,?LINE,send("pwd")}]),
+    timer:sleep(500),
     io:format("~p~n",[{?MODULE,?LINE,send("git clone https://github.com/joq62/adder_service.git 30001")}]),
- %   io:format("~p~n",[{?MODULE,?LINE,send("pwd")}]),
+    io:format("~p~n",[{?MODULE,?LINE,send("pwd")}]),
    % io:format("~p~n",[send("cp adder_service/* 30000")]),
  %   send("cp -r adder_service/* 30001"),
 %    send("rm -rf adder_service"),
-    timer:sleep(200),
+    timer:sleep(300),
  %   io:format("~p~n",[{?MODULE,?LINE,send("ls")}]),
     [Cwd]=send("pwd"),
 %   Cwd="glurk",
-    timer:sleep(200),
+    timer:sleep(300),
 %    io:format("~p~n",[send("pwd ")]),
 
     io:format("~p~n",[{?MODULE,?LINE,send("cp "++Cwd++"/"++"30000/src/*.app 30000/ebin")}]),
-    timer:sleep(200),
+    timer:sleep(500),
     io:format("~p~n",[{?MODULE,?LINE,send("cp "++Cwd++"/"++"30001/src/adder_service.app 30001/ebin")}]),
-    timer:sleep(200),
+    timer:sleep(500),
     io:format("~p~n",[{?MODULE,?LINE,send("erlc -I include -o 30000/ebin 30000/src/*.erl")}]),
     io:format("~p~n",[{?MODULE,?LINE,send("erl -pa 30000/ebin -s adder_service boot -sname 30000  -setcookie abc -detached")}]),
     timer:sleep(1000),
@@ -82,9 +82,7 @@ send(Msg)->
     ssh_connection:exec(ConRef,ChanId,Msg,infinity),
     R=rec(<<"na">>),
     X1=binary_to_list(R),
-    X=string:tokens(X1,"\n"),
-    io:format("~p~n",[{?MODULE,?LINE,X}]),
-    X.
+    X=string:tokens(X1,"\n").
 
 send(Ip,Port,User,Password, Msg)->
 %    {ok,ConRef1}=ssh:connect("varmdo.asuscomm.com",50222,[{user,"pi"},{password,"festum01"}]).
@@ -93,9 +91,7 @@ send(Ip,Port,User,Password, Msg)->
     ssh_connection:exec(ConRef,ChanId,Msg,infinity),
     R=rec(<<"na">>),
     X1=binary_to_list(R),
-    X=string:tokens(X1,"\n"),
-    io:format("~p~n",[{?MODULE,?LINE,X}]),
-    X.
+    X=string:tokens(X1,"\n").
 
 
 

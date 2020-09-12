@@ -1,0 +1,10 @@
+-record(node,
+	{
+	  host_id,
+	  vsn,
+	  ip_addr,
+	  ssh_id,
+	  ssh_pwd,
+	  vm_id,
+	  capability
+	}).

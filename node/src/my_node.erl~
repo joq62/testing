@@ -7,7 +7,7 @@
 %% available at <b>/sys/class/gpio/</b>.
 %% @end
  
--module(my_ssh).
+-module(my_node).
 -export([ls/0,start/0,send/1,send/5,test/0]).
 -author('joq erlang').
 
@@ -36,42 +36,35 @@ test()->
     timer:sleep(200),
     rpc:call(?VM1,init,stop,[]),
     timer:sleep(200),
-    send("rm -rf 30000 30001"),
-    send("mkdir 30000"),
-    send("mkdir 30001"),
-    send("rm -rf include configs *_service  erl_crasch.dump"),
-    send("git clone https://github.com/joq62/include.git"),
-    io:format("~p~n",[{?MODULE,?LINE,send("git clone https://github.com/joq62/adder_service.git 30000")}]),
+    os:cmd("rm -rf 30000 30001"),
+    os:cmd("mkdir 30000"),
+    os:cmd("mkdir 30001"),
+    os:cmd("rm -rf include configs *_service  erl_crasch.dump"),
+    os:cmd("git clone https://github.com/joq62/include.git"),
+    io:format("~p~n",[{?MODULE,?LINE,os:cmd("git clone https://github.com/joq62/adder_service.git 30000")}]),
   %  io:format("~p~n",[{?MODULE,?LINE,send("pwd")}]),
     timer:sleep(200),
-    io:format("~p~n",[{?MODULE,?LINE,send("git clone https://github.com/joq62/adder_service.git 30001")}]),
- %   io:format("~p~n",[{?MODULE,?LINE,send("pwd")}]),
-   % io:format("~p~n",[send("cp adder_service/* 30000")]),
- %   send("cp -r adder_service/* 30001"),
-%    send("rm -rf adder_service"),
-    timer:sleep(200),
- %   io:format("~p~n",[{?MODULE,?LINE,send("ls")}]),
-    [Cwd]=send("pwd"),
-%   Cwd="glurk",
+    io:format("~p~n",[{?MODULE,?LINE,os:cmd("git clone https://github.com/joq62/adder_service.git 30001")}]),
+
     timer:sleep(200),
 %    io:format("~p~n",[send("pwd ")]),
 
-    io:format("~p~n",[{?MODULE,?LINE,send("cp "++Cwd++"/"++"30000/src/*.app 30000/ebin")}]),
+    io:format("~p~n",[{?MODULE,?LINE,os:cmd("cp 30000/src/*.app 30000/ebin")}]),
     timer:sleep(200),
-    io:format("~p~n",[{?MODULE,?LINE,send("cp "++Cwd++"/"++"30001/src/adder_service.app 30001/ebin")}]),
+    io:format("~p~n",[{?MODULE,?LINE,os:cmd("cp 30001/src/adder_service.app 30001/ebin")}]),
     timer:sleep(200),
-    io:format("~p~n",[{?MODULE,?LINE,send("erlc -I include -o 30000/ebin 30000/src/*.erl")}]),
-    io:format("~p~n",[{?MODULE,?LINE,send("erl -pa 30000/ebin -s adder_service boot -sname 30000  -setcookie abc -detached")}]),
+    io:format("~p~n",[{?MODULE,?LINE,os:cmd("erlc -I include -o 30000/ebin 30000/src/*.erl")}]),
+    io:format("~p~n",[{?MODULE,?LINE,os:cmd("erl -pa 30000/ebin -s adder_service boot -sname 30000  -setcookie abc -detached")}]),
     timer:sleep(1000),
-    io:format("~p~n",[{?MODULE,?LINE,send("erlc -I include -o 30001/ebin 30001/src/*.erl")}]),
-    io:format("~p~n",[{?MODULE,?LINE,send("erl -pa 30000/ebin -s adder_service boot -sname 30001  -setcookie abc -detached")}]),
+    io:format("~p~n",[{?MODULE,?LINE,os:cmd("erlc -I include -o 30001/ebin 30001/src/*.erl")}]),
+    io:format("~p~n",[{?MODULE,?LINE,os:cmd("erl -pa 30001/ebin -s adder_service boot -sname 30001  -setcookie abc -detached")}]),
     timer:sleep(1000),
     pong=net_adm:ping(?VM0),
     pong=net_adm:ping(?VM1),
     io:format("~p~n",[rpc:call(?VM0,adder_service,add,[20,22],3000)]),
     io:format("~p~n",[rpc:call(?VM1,adder_service,add,[20,220],3000)]),
-    rpc:call(?VM0,init,stop,[],2000),
-    rpc:call(?VM1,init,stop,[],2000),
+ %   rpc:call(?VM0,init,stop,[],2000),
+ %   rpc:call(?VM1,init,stop,[],2000),
     ok.
 
 

@@ -1,0 +1,8 @@
+{node,	{host_id,"asus"},
+	{vsn,"0.0.99"},
+	{ip_addr,"192.168.0.50"},
+	{ssh_id,"pi"},
+	{ssh_pwd,"festum01"},
+	{vm_id,"10250"},
+	{capability,[tellstick]}
+}.
