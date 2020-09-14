@@ -1,0 +1,3 @@
+{service_def,"adder.service_def"}.
+{num,1}.
+{options,["asus"]}.

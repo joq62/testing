@@ -33,7 +33,7 @@ start()->
     %% Start application tests
 
     ?debugMsg("mnesia test "),
-    ?assertEqual(ok,mnesia_test:start()),    
+    ?assertEqual(ok,mnesia_test_2:start()),    
     
     ?debugMsg("ssh test "),
   %  ?assertEqual(ok,ssh_test:start()),
