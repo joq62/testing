@@ -29,3 +29,8 @@
 	  service_vsn,
 	  vm
 	}).
+-record(service_discovery,
+	{
+	  id,
+	  vms
+	}).

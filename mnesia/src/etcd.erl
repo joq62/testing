@@ -12,7 +12,8 @@ init()->
     mnesia:create_table(computer, [{attributes, record_info(fields, computer)}]),
     mnesia:create_table(service_def, [{attributes, record_info(fields, service_def)}]),
     mnesia:create_table(deployment_spec, [{attributes, record_info(fields, deployment_spec)}]),
-    mnesia:create_table( deployment, [{attributes, record_info(fields, deployment)}]),
+    mnesia:create_table(deployment, [{attributes, record_info(fields, deployment)}]),
+    mnesia:create_table(service_discovery, [{attributes, record_info(fields, service_discovery)}]),
     mnesia:stop().
 
 create_table(Table,TableArgs)->
@@ -44,20 +45,40 @@ read_all(Table) ->
   do(qlc:q([X || X <- mnesia:table(Table)])).
 
 
+read_sd(ServiceId) ->
+    do(qlc:q([X || X <- mnesia:table(service_discovery),
+		   X#service_discovery.id==ServiceId])).
+
+
+update_sd(ServiceId,Node)->
+    F = fun() ->
+		case mnesia:read({service_discovery,ServiceId}) of
+		    []->
+			mnesia:abort(service_discovery);
+		    [ServiceInfo]->
+			NewVmsList=[Node|lists:delete(Node,ServiceInfo#service_discovery.vms)],
+			mnesia:write(#service_discovery{id=ServiceId,vms=NewVmsList})
+		end		
+	end,
+    mnesia:transaction(F).
+
+delete_sd_vm(ServiceId,Node) ->
+    F = fun() ->
+		case mnesia:read({service_discovery,ServiceId}) of
+		    []->
+			mnesia:abort(service_discovery);
+		    [ServiceInfo]->
+			NewVmsList=lists:delete(Node,ServiceInfo#service_discovery.vms),
+			mnesia:write(#service_discovery{id=ServiceId,vms=NewVmsList})
+		end		
+	end,
+    mnesia:transaction(F).
+
+
 read_computer(HostId) ->
     do(qlc:q([X || X <- mnesia:table(computer),
 		   X#computer.host_id==HostId])).
 
-read_service_def(ServiceId) ->
-    R=case do(qlc:q([X || X <- mnesia:table(service_def),
-		   X#service_def.id==ServiceId])) of
-	  []->
-	      [];
-	  [ServiceDef] ->
-	      {ServiceDef#service_def.id,ServiceDef#service_def.vsn,
-	       ServiceDef#service_def.git_path}
-      end,
-    R.
 
 update_computer_item(HostId,SshId,SshPwd,IpAddr,Port)->
     F = fun() ->
@@ -73,6 +94,18 @@ delete_computer_item(HostId) ->
     Oid = {computer, HostId},
     F = fun() -> mnesia:delete(Oid) end,
   mnesia:transaction(F).
+
+
+read_service_def(ServiceId) ->
+    R=case do(qlc:q([X || X <- mnesia:table(service_def),
+		   X#service_def.id==ServiceId])) of
+	  []->
+	      [];
+	  [ServiceDef] ->
+	      {ServiceDef#service_def.id,ServiceDef#service_def.vsn,
+	       ServiceDef#service_def.git_path}
+      end,
+    R.
 
 reset_tables(Table,TableInfo) ->
     mnesia:clear_table(Table),

@@ -26,6 +26,8 @@
 start()->
     ?debugMsg("test_1"),
     test_1(),
+    ?debugMsg("sd"),
+    sd(),
  %   ?debugMsg("Deployment_test"),
  %   deployment_test(),
   %  ?debugMsg("test_3"),
@@ -33,6 +35,36 @@ start()->
     ok.
 
 
+
+
+
+
+%% --------------------------------------------------------------------
+%% Function:start/0 
+%% Description: Initiate the eunit tests, set upp needed processes etc
+%% Returns: non
+%% -------------------------------------------------------------------
+sd()->
+    ?assertMatch([],etcd:read_sd("s1")),
+    etcd:create(#service_discovery{id="s1",vms=[]}),
+    ?assertMatch([{service_discovery,"s1",[]}],etcd:read_sd("s1")),
+    etcd:update_sd("s1",'vm1@host1'),
+    ?assertMatch([{service_discovery,"s1",['vm1@host1']}],etcd:read_sd("s1")),
+    etcd:update_sd("s1",'vm1@host2'),
+    ?assertMatch([{service_discovery,"s1",['vm1@host2','vm1@host1']}],etcd:read_sd("s1")),
+    etcd:delete_sd_vm("s1",'vm1@host2'),
+    ?assertMatch([{service_discovery,"s1",['vm1@host1']}],etcd:read_sd("s1")), 
+
+    etcd:create(#service_discovery{id="s2",vms=['vm1@host2']}),
+    ?assertMatch([{service_discovery,"s2",['vm1@host2']}],etcd:read_sd("s2")),
+
+    etcd:update_sd("glurk",'vm1@host2'),
+    ?assertMatch([{service_discovery,"s2",['vm1@host2']},
+		  {service_discovery,"s1",['vm1@host1']}],etcd:read_all(service_discovery)),
+    
+
+    
+    ok.
 
 %% --------------------------------------------------------------------
 %% Function:start/0 
