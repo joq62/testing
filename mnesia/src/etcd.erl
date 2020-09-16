@@ -3,13 +3,16 @@
 -compile(export_all).
 
 -include_lib("stdlib/include/qlc.hrl").
--include("node.hrl").
+-include("infra_3.hrl").
 
 
 init()->
     mnesia:create_schema([node()]),
     mnesia:start(),
-    mnesia:create_table(node, [{attributes, record_info(fields, node)}]),
+    mnesia:create_table(computer, [{attributes, record_info(fields, computer)}]),
+    mnesia:create_table(service_def, [{attributes, record_info(fields, service_def)}]),
+    mnesia:create_table(deployment_spec, [{attributes, record_info(fields, deployment_spec)}]),
+    mnesia:create_table( deployment, [{attributes, record_info(fields, deployment)}]),
     mnesia:stop().
 
 create_table(Table,TableArgs)->
@@ -19,11 +22,11 @@ start(Tables) ->
   mnesia:start(),
   mnesia:wait_for_tables(Tables, 20000).
 
-create_node_item(NodeRecord) ->
+create(Record) ->
     
   %  NodeRecord = #node{host_id=HostId,vsn=Vsn,ip_addr=IpAddr,ssh_id=SshId,ssh_pwd=SshPwd,
 %		       vm_id=VmId,capability=Capability},
-    F = fun() -> mnesia:write(NodeRecord) end,
+    F = fun() -> mnesia:write(Record) end,
     mnesia:transaction(F).
 
 
@@ -41,25 +44,34 @@ read_all(Table) ->
   do(qlc:q([X || X <- mnesia:table(Table)])).
 
 
-read_node(HostId) ->
-    do(qlc:q([X || X <- mnesia:table(node),
-		   X#node.host_id==HostId])).
+read_computer(HostId) ->
+    do(qlc:q([X || X <- mnesia:table(computer),
+		   X#computer.host_id==HostId])).
 
+read_service_def(ServiceId) ->
+    R=case do(qlc:q([X || X <- mnesia:table(service_def),
+		   X#service_def.id==ServiceId])) of
+	  []->
+	      [];
+	  [ServiceDef] ->
+	      {ServiceDef#service_def.id,ServiceDef#service_def.vsn,
+	       ServiceDef#service_def.git_path}
+      end,
+    R.
 
-update_node_item({node,{host_id,HostId},{vsn,Vsn},{ip_addr,IpAddr},{ssh_id,SshId},{ssh_pwd,SshPwd},
-		   {vm_id,VmId},{capability,Capability}})->
+update_computer_item(HostId,SshId,SshPwd,IpAddr,Port)->
     F = fun() ->
-		Oid = {node, HostId},
+		Oid = {computer, HostId},
 		mnesia:delete(Oid),
-		NodeRecord = #node{host_id=HostId,vsn=Vsn,ip_addr=IpAddr,ssh_id=SshId,ssh_pwd=SshPwd,
-				   vm_id=VmId,capability=Capability},
-		mnesia:write(NodeRecord)
+		Record = #computer{host_id=HostId,ssh_uid=SshId,ssh_passwd=SshPwd,
+				   ip_addr=IpAddr,port=Port},
+		mnesia:write(Record)
 	end,
     mnesia:transaction(F).
 
-delete_node_item(HostId) ->
-  Oid = {node, HostId},
-  F = fun() -> mnesia:delete(Oid) end,
+delete_computer_item(HostId) ->
+    Oid = {computer, HostId},
+    F = fun() -> mnesia:delete(Oid) end,
   mnesia:transaction(F).
 
 reset_tables(Table,TableInfo) ->

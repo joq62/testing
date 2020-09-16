@@ -33,7 +33,7 @@ start()->
     %% Start application tests
 
     ?debugMsg("mnesia test "),
-    ?assertEqual(ok,mnesia_test_2:start()),    
+    ?assertEqual(ok,mnesia_test_3:start()),    
     
     ?debugMsg("ssh test "),
   %  ?assertEqual(ok,ssh_test:start()),
@@ -55,6 +55,7 @@ start()->
 %% --------------------------------------------------------------------
 setup()->
     etcd:init(),
+    etcd:start([computer,service_def,deployment_spec,deployment]),
 
     ok.
 

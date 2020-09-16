@@ -10,7 +10,7 @@
 
 -record(service_def,
 	{
-	  app_id,
+	  id,
 	  vsn,
 	  git_path
 	}).
@@ -26,7 +26,8 @@
 	{
 	  id,   %"etcd_0"
 	  vsn,  %"1.0.0"
-	  instances %[instances]
+	  
+	instances %[instances]
 	}).
 
 
