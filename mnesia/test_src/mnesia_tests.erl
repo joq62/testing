@@ -54,9 +54,13 @@ start()->
 %% Returns: non
 %% --------------------------------------------------------------------
 setup()->
-    etcd:init(),
-    etcd:start([computer,service_def,deployment_spec,deployment]),
-
+    mnesia:create_schema([node()]), %Should be started by db_mnesia
+    mnesia:start(),
+    db_computer:create_table(),
+    db_service_def:create_table(),
+    db_service_discovery:create_table(),
+    db_deployment_spec:create_table(),
+    
     ok.
 
 cleanup()->

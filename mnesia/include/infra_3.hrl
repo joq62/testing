@@ -12,7 +12,7 @@
 	{
 	  id,
 	  vsn,
-	  git_path
+	  source
 	}).
 
 -record(deployment_spec,
@@ -23,14 +23,14 @@
 	}).
 -record(deployment,
 	{
-	  deployment_id,
-	  deployment_vsn,
-	  service_def,
+	  id,
+	  vsn,
+	  service_id,
 	  service_vsn,
 	  vm
 	}).
 -record(service_discovery,
 	{
 	  id,
-	  vms
+	  vm
 	}).
