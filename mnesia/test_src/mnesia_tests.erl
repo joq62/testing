@@ -60,6 +60,7 @@ setup()->
     db_service_def:create_table(),
     db_service_discovery:create_table(),
     db_deployment_spec:create_table(),
+    db_deployment:create_table(),
     
     ok.
 

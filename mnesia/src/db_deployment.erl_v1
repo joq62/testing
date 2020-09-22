@@ -15,8 +15,7 @@ start() ->
  %   mnesia:wait_for_tables(?TABLE, 20000).   %Should be started by db_mnesia
     ok.
 create_table()->
-    mnesia:create_table(?TABLE, [{attributes, record_info(fields, ?RECORD)},
-				{type,bag}]),
+    mnesia:create_table(?TABLE, [{attributes, record_info(fields, ?RECORD)}]),
     mnesia:wait_for_tables(?TABLE, 20000).
 
 create(Record) ->
@@ -24,34 +23,28 @@ create(Record) ->
     mnesia:transaction(F).
 
 read_all() ->
-    Z=do(qlc:q([X || X <- mnesia:table(?TABLE)])),
-    [{Id,Vsn,ServiceId,ServiceVsn,Vm}||{?RECORD,Id,Vsn,ServiceId,ServiceVsn,Vm}<-Z].
+  do(qlc:q([X || X <- mnesia:table(?TABLE)])).
 
 
 
 read(Id) ->
-    Z=do(qlc:q([X || X <- mnesia:table(?TABLE),
-		   X#?RECORD.id==Id])),
-    [{SpecId,Vsn,ServiceId,ServiceVsn,Vm}||{?RECORD,SpecId,Vsn,ServiceId,ServiceVsn,Vm}<-Z].
+    do(qlc:q([X || X <- mnesia:table(?TABLE),
+		   X#?RECORD.id==Id])).
 
 
-delete(Id,Vsn,ServiceId,ServiceVsn,Vm) ->
-
-    F = fun() -> 
-		Deployment=[X||X<-mnesia:read({?TABLE,Id}),
-			       X#?RECORD.id==Id,
-			       X#?RECORD.vsn==Vsn,
-			       X#?RECORD.service_id==ServiceId,
-			       X#?RECORD.service_vsn==ServiceVsn,
-			       X#?RECORD.vm==Vm],
-		case Deployment of
-		    []->
-			mnesia:abort(?TABLE);
-		    [S1]->
-			mnesia:delete_object(S1) 
-		end
+update(Id,Vsn,ServiceId,ServiceVsn,Vm)->
+    F = fun() ->
+		Oid = {?TABLE, Id},
+		mnesia:delete(Oid),
+		Record = #?RECORD{id=Id,vsn=Vsn,service_id=ServiceId,service_vsn=ServiceVsn,vm=Vm},
+		mnesia:write(Record)
 	end,
     mnesia:transaction(F).
+
+delete(Id) ->
+    Oid = {?TABLE,Id},
+    F = fun() -> mnesia:delete(Oid) end,
+  mnesia:transaction(F).
 
 
 do(Q) ->

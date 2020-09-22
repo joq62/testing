@@ -52,7 +52,37 @@ start()->
 %% Returns: non
 %% -------------------------------------------------------------------
 db_deployment()->
+    db_deployment:create(#deployment{id="etcd",vsn="1.0.0",
+				     service_id="etcd_service",
+				     service_vsn="2.3.4",
+				     vm='2378@host1'}),
+    ?assertMatch([{"etcd","1.0.0","etcd_service","2.3.4",'2378@host1'}],
+		 db_deployment:read_all()),
+    db_deployment:create(#deployment{id="etcd",vsn="1.0.0",
+				     service_id="etcd_service",
+				     service_vsn="2.3.4",
+				     vm='2379@host1'}),
+    db_deployment:create(#deployment{id="etcd",vsn="1.0.0",
+				     service_id="etcd_service",
+				     service_vsn="2.3.4",
+				     vm='2380@host1'}),
     
+    ?assertMatch([{"etcd","1.0.0","etcd_service","2.3.4",'2378@host1'},
+		  {"etcd","1.0.0","etcd_service","2.3.4",'2379@host1'},
+		  {"etcd","1.0.0","etcd_service","2.3.4",'2380@host1'}],
+		 db_deployment:read("etcd")),
+
+
+    ?assertMatch([{"etcd","1.0.0","etcd_service","2.3.4",'2378@host1'},
+		  {"etcd","1.0.0","etcd_service","2.3.4",'2379@host1'},
+		  {"etcd","1.0.0","etcd_service","2.3.4",'2380@host1'}],
+		 db_deployment:read_all()),
+
+    {atomic,ok}=db_deployment:delete("etcd","1.0.0","etcd_service","2.3.4",'2379@host1'),
+
+    ?assertMatch([{"etcd","1.0.0","etcd_service","2.3.4",'2378@host1'},
+		  {"etcd","1.0.0","etcd_service","2.3.4",'2380@host1'}],
+		 db_deployment:read_all()),
     ok.
 
 
