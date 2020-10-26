@@ -1,0 +1,98 @@
+-module(computer).
+-import(lists, [foreach/2]).
+-compile(export_all).
+
+-include_lib("stdlib/include/qlc.hrl").
+-include("infra_3.hrl").
+
+-define(TABLE,computer).
+-define(RECORD,computer).
+
+start() ->
+    mnesia:create_schema([node()]),
+    mnesia:start(),
+    mnesia:create_table(?TABLE, [{attributes, record_info(fields, ?RECORD)}]),
+    mnesia:wait_for_tables(?TABLE, 20000).
+
+create(ComputerRecord) ->
+    F = fun() -> mnesia:write(ComputerRecord) end,
+    mnesia:transaction(F).
+
+read_all() ->
+  do(qlc:q([X || X <- mnesia:table(?TABLE)])).
+
+
+read_sd(ServiceId) ->
+    do(qlc:q([X || X <- mnesia:table(?TABLE),
+		   X#?RECORD.id==ServiceId])).
+
+
+update_sd(ServiceId,Node)->
+    F = fun() ->
+		case mnesia:read({?TABLE,ServiceId}) of
+		    []->
+			mnesia:abort(?TABLE);
+		    [ServiceInfo]->
+			NewVmsList=[Node|lists:delete(Node,ServiceInfo#?RECORD.vms)],
+			mnesia:write(#?RECORD{id=ServiceId,vms=NewVmsList})
+		end		
+	end,
+    mnesia:transaction(F).
+
+delete_sd_vm(ServiceId,Node) ->
+    F = fun() ->
+		case mnesia:read({?TABLE,ServiceId}) of
+		    []->
+			mnesia:abort(?TABLE);
+		    [ServiceInfo]->
+			NewVmsList=lists:delete(Node,ServiceInfo#?RECORD.vms),
+			mnesia:write(#?RECORD{id=ServiceId,vms=NewVmsList})
+		end		
+	end,
+    mnesia:transaction(F).
+
+
+read(HostId) ->
+    do(qlc:q([X || X <- mnesia:table(?TABLE),
+		   X#?RECORD.host_id==HostId])).
+
+
+update(HostId,SshId,SshPwd,IpAddr,Port)->
+    F = fun() ->
+		Oid = {?TABLE, HostId},
+		mnesia:delete(Oid),
+		Record = #?RECORD{host_id=HostId,ssh_uid=SshId,ssh_passwd=SshPwd,
+				  ip_addr=IpAddr,port=Port},
+		mnesia:write(Record)
+	end,
+    mnesia:transaction(F).
+
+delete(HostId) ->
+    Oid = {?TABLE, HostId},
+    F = fun() -> mnesia:delete(Oid) end,
+  mnesia:transaction(F).
+
+
+read_service_def(ServiceId) ->
+    R=case do(qlc:q([X || X <- mnesia:table(service_def),
+		   X#service_def.id==ServiceId])) of
+	  []->
+	      [];
+	  [ServiceDef] ->
+	      {ServiceDef#service_def.id,ServiceDef#service_def.vsn,
+	       ServiceDef#service_def.git_path}
+      end,
+    R.
+
+reset_tables(Table,TableInfo) ->
+    mnesia:clear_table(Table),
+    F = fun() -> foreach(fun mnesia:write/1, TableInfo) end,
+ %  F = fun() -> foreach(fun mnesia:write/1, example_tables()) end,
+  mnesia:transaction(F).
+
+do(Q) ->
+  F = fun() -> qlc:e(Q) end,
+  {atomic, Val} = mnesia:transaction(F),
+  Val.
+
+%%-------------------------------------------------------------------------

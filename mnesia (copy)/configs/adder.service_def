@@ -1,0 +1,2 @@
+% record	id		vsn	git_path
+{service_def,"adder_service","1.2.3","https://github.com/joq62/"}.

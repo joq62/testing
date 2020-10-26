@@ -1,0 +1,8 @@
+[
+ %% write log files to logs
+ {sasl,
+    [{sasl_error_logger,{file,"./logs"}}]},
+ {math,
+    [
+    %% Contact nodes
+    {contact_nodes,[]}]}.

@@ -15,6 +15,24 @@
 %% External exports
 -export([start/0]).
 
+-record(computer,
+	{
+	  host_id,
+	  ssh_uid,
+	  ssh_passwd,
+	  ip_addr,
+	  port,
+	  status
+	}).
+-record(vm,
+	{
+	  vm,
+	  host_id,
+	  vm_id,
+	  type,
+	  status
+	}).
+
 
 
 %% ====================================================================
@@ -28,23 +46,23 @@
 %% --------------------------------------------------------------------
 start()->
     ?debugMsg("Test system setup"),
-    ?assertEqual(ok,setup()),
+    ?assertEqual(ok,dynamic:start()),
 
     %% Start application tests
 
-    ?debugMsg("mnesia test "),
-    ?assertEqual(ok,mnesia_test_3:start()),    
+  %  ?debugMsg("mnesia test "),
+  %  ?assertEqual(ok,mnesia_test_3:start()),    
     
-    ?debugMsg("ssh test "),
+  %  ?debugMsg("ssh test "),
   %  ?assertEqual(ok,ssh_test:start()),
     
-    ?debugMsg("node test "),
+  %  ?debugMsg("node test "),
   %  ?assertEqual(ok,node_test:start(2)),
 
 
     ?debugMsg("Start stop_test_system:start"),
     %% End application tests
-    cleanup(),
+ %   cleanup(),
     ok.
 
 
@@ -67,7 +85,4 @@ setup()->
 cleanup()->
     mnesia:stop(),
     init:stop().
-
-
-
 

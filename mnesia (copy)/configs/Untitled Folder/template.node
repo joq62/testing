@@ -1,0 +1,9 @@
+{kind,node}.
+{api_version,"x.y.z"}.
+{ip_addr,"192.168.x.x"|"varmdo.asuscomm.com"}.
+{ssh_port,xyx}.
+{ssh_user,"user_id"}.
+{ssh_passwd,"password"}.
+{vm_id,"vm_name"}.
+{host_id,"Host"}.
+{capability,[]|[{tellstick,Args}]}.

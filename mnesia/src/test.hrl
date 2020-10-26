@@ -1,0 +1,17 @@
+-record(computer,
+	{
+	  host_id,
+	  ssh_uid,
+	  ssh_passwd,
+	  ip_addr,
+	  port,
+	  status
+	}).
+-record(vm,
+	{
+	  vm,
+	  host_id,
+	  vm_id,
+	  type,
+	  status
+	}).
